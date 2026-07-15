@@ -1,9 +1,9 @@
 ---
-title: "2019 03 01 Time_flash"
-slug: ""
-date: 2026-07-15T10:04:27+09:00
-description: ""
-draft: true
+title: "Time_flash"
+slug: "time-flash"
+date: 2019-03-01T10:04:27+09:00
+description: "2019年的全年计划"
+draft: false
 ---
 
 # 关于2019年的全年计划
