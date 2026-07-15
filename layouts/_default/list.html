@@ -1,0 +1,21 @@
+{{ define "title" }}
+    {{ if .Parent }}{{ .Title }} — {{ end }}{{ .Site.Title }}
+{{ end }}
+
+{{ define "main" }}
+<section class="section-listing">
+    <h1>{{ .Title }}</h1>
+    {{ with .Content }}<div class="section-content">{{ . }}</div>{{ end }}
+    {{ range .Pages.ByDate.Reverse }}
+    <div class="post-item">
+        <time datetime="{{ .Date.Format `2006-01-02` }}">{{ .Date.Format `2006-01-02` }}</time>
+        <a href="{{ .RelPermalink }}" class="post-link">{{ .Title }}</a>
+        {{ with .Description }}
+        <span class="post-desc">{{ . }}</span>
+        {{ end }}
+    </div>
+    {{ else }}
+    <p class="empty-state">暂无内容。</p>
+    {{ end }}
+</section>
+{{ end }}

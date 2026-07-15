@@ -1,0 +1,289 @@
+/* ============================================================
+   Reset
+   ============================================================ */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+                 Roboto, Helvetica, Arial, sans-serif;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    line-height: 1.8;
+    color: #1a1a1a;
+    background: #fff;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+    line-height: 1.3;
+}
+
+h1 { font-size: 1.75rem; font-weight: 700; }
+h2 { font-size: 1.5rem; font-weight: 700; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+h4 { font-size: 1rem; font-weight: 600; }
+
+a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: opacity 0.15s;
+}
+a:hover { opacity: 0.6; }
+
+/* ============================================================
+   Header & Footer
+   ============================================================ */
+.site-header {
+    margin-bottom: 3rem;
+}
+.site-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: -0.02em;
+}
+
+.site-footer {
+    margin-top: 4rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+    font-size: 0.875rem;
+    color: #999;
+}
+.site-footer a { color: #999; }
+
+/* ============================================================
+   Timeline (Homepage)
+   ============================================================ */
+.timeline-year {
+    margin-bottom: 2.5rem;
+}
+.year-heading {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid #e8e8e8;
+}
+
+.timeline-month {
+    margin-left: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.month-heading {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-day {
+    margin-left: 1.25rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+}
+.day-heading {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #aaa;
+    min-width: 1.8rem;
+    text-align: right;
+}
+
+.post-list {
+    list-style: none;
+    flex: 1;
+}
+.timeline-day .post-item {
+    margin-bottom: 0.3rem;
+    line-height: 1.6;
+}
+
+.post-link {
+    font-weight: 500;
+    text-decoration: none;
+}
+.post-link:hover {
+    text-decoration: underline;
+}
+
+.post-desc {
+    font-size: 0.8125rem;
+    color: #999;
+    margin-left: 0.6rem;
+}
+
+/* ============================================================
+   Single Post
+   ============================================================ */
+.post-header {
+    margin-bottom: 2rem;
+}
+.post-header h1 {
+    margin-bottom: 0.5rem;
+}
+.post-meta {
+    font-size: 0.875rem;
+    color: #999;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+.post-subtitle {
+    margin-top: 0.75rem;
+    font-size: 0.9375rem;
+    color: #666;
+}
+
+.post-content {
+    line-height: 1.85;
+}
+.post-content p,
+.post-content ul,
+.post-content ol,
+.post-content blockquote,
+.post-content pre {
+    margin-bottom: 1.25rem;
+}
+.post-content img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1.5rem auto;
+}
+.post-content blockquote {
+    border-left: 3px solid #ddd;
+    padding-left: 1rem;
+    color: #666;
+}
+.post-content code {
+    font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+    font-size: 0.875em;
+    background: #f5f5f5;
+    padding: 0.15em 0.35em;
+    border-radius: 3px;
+}
+.post-content pre {
+    background: #f5f5f5;
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.7;
+}
+.post-content pre code {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+}
+.post-content ul,
+.post-content ol {
+    padding-left: 1.5rem;
+}
+.post-content h2,
+.post-content h3,
+.post-content h4 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+}
+.post-content h2 { font-size: 1.3rem; }
+.post-content h3 { font-size: 1.1rem; }
+
+.post-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+    font-size: 0.875rem;
+}
+
+/* ============================================================
+   Section Listing
+   ============================================================ */
+.section-listing h1 {
+    margin-bottom: 1.5rem;
+}
+.section-listing .post-item {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+    line-height: 1.7;
+}
+.section-listing time {
+    font-size: 0.8125rem;
+    color: #aaa;
+    min-width: 5.5rem;
+    flex-shrink: 0;
+}
+.section-listing .post-link {
+    text-decoration: none;
+}
+.section-listing .post-link:hover {
+    text-decoration: underline;
+}
+
+/* ============================================================
+   Empty / 404
+   ============================================================ */
+.empty-state {
+    color: #aaa;
+    font-style: italic;
+}
+.error-page {
+    text-align: center;
+    padding: 4rem 0;
+}
+.error-page h1 {
+    font-size: 5rem;
+    font-weight: 700;
+    color: #eee;
+    margin-bottom: 1rem;
+}
+.error-page p {
+    color: #999;
+    margin-bottom: 1.5rem;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 500px) {
+    body {
+        padding: 1.5rem 1rem;
+    }
+    .timeline-month {
+        margin-left: 0.5rem;
+    }
+    .timeline-day {
+        margin-left: 0.25rem;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+    .day-heading {
+        text-align: left;
+    }
+    .section-listing .post-item {
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+    .section-listing time {
+        min-width: auto;
+    }
+    .post-desc {
+        margin-left: 0;
+        display: block;
+    }
+}

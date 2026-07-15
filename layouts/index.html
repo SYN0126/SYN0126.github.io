@@ -1,0 +1,34 @@
+{{ define "main" }}
+<section class="timeline">
+    {{ $posts := where site.RegularPages "Section" "posts" }}
+    {{ if $posts }}
+        {{ range $posts.GroupByDate "2006" }}
+        <div class="timeline-year">
+            <h2 class="year-heading">{{ .Key }}</h2>
+            {{ range .Pages.GroupByDate "January" }}
+            <div class="timeline-month">
+                <h3 class="month-heading">{{ .Key }}</h3>
+                {{ range .Pages.GroupByDate "2" }}
+                <div class="timeline-day">
+                    <span class="day-heading">{{ .Key }}</span>
+                    <ul class="post-list">
+                        {{ range .Pages }}
+                        <li class="post-item">
+                            <a href="{{ .RelPermalink }}" class="post-link">{{ .Title }}</a>
+                            {{ with .Description }}
+                            <span class="post-desc">{{ . }}</span>
+                            {{ end }}
+                        </li>
+                        {{ end }}
+                    </ul>
+                </div>
+                {{ end }}
+            </div>
+            {{ end }}
+        </div>
+        {{ end }}
+    {{ else }}
+        <p class="empty-state">还没有文章，敬请期待。</p>
+    {{ end }}
+</section>
+{{ end }}

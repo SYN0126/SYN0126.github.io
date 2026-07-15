@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Locale }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
+    {{ if .Description }}
+    <meta name="description" content="{{ .Description }}">
+    {{ else if .IsHome }}
+    <meta name="description" content="{{ .Site.Params.description }}">
+    {{ end }}
+    <link rel="alternate" type="application/rss+xml" href="{{ `index.xml` | absURL }}" title="{{ .Site.Title }}">
+    {{ $css := resources.Get `css/main.css` | resources.Minify | resources.Fingerprint }}
+    <link rel="stylesheet" href="{{ $css.RelPermalink }}">
+</head>
+<body>
+    <header class="site-header">
+        <nav>
+            <a href="{{ site.Home.RelPermalink }}" class="site-title">{{ .Site.Title }}</a>
+        </nav>
+    </header>
+    <main>
+        {{ block "main" . }}{{ end }}
+    </main>
+    <footer class="site-footer">
+        <p>&copy; {{ now.Format `2006` }} {{ .Site.Params.author }}</p>
+    </footer>
+</body>
+</html>

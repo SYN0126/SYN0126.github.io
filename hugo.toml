@@ -1,0 +1,38 @@
+baseURL = "https://SYN0126.github.io"
+title = "小龙的博客"
+locale = "zh-cn"
+
+# Draft posts are not published
+buildDrafts = false
+buildFuture = false
+buildExpired = false
+canonifyURLs = false
+
+# Pagination
+paginate = 20
+paginatePath = "page"
+
+# Output formats
+[outputs]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS"]
+  page = ["HTML"]
+
+# Clean URLs: /hello-world/ instead of /posts/hello-world/
+[permalinks]
+  posts = "/:slug/"
+
+# Resolve date from frontmatter first, then from filename (YYYY-MM-DD format)
+[frontmatter]
+  date = ["date", ":filename"]
+  lastmod = [":git", "lastmod", "date"]
+  publishDate = ["publishDate", "date"]
+
+# Markdown rendering (safe mode — no raw HTML in posts)
+[markup.goldmark.renderer]
+  unsafe = false
+
+# Site metadata
+[params]
+  author = "小龙"
+  description = "记录思考，分享观点。"
