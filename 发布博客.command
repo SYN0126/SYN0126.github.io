@@ -40,6 +40,7 @@ if ! hugo \
     --noBuildLock \
     --cleanDestinationDir \
     --minify \
+    --printPathWarnings \
     --panicOnWarning; then
     fail "网站构建失败。请先根据上面的错误信息修改内容。"
 fi
