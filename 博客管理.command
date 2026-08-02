@@ -4,6 +4,7 @@ set -u
 
 SCRIPT_DIR="${0:A:h}"
 POST_DIR="$SCRIPT_DIR/content/posts"
+ABOUT_FILE="$SCRIPT_DIR/content/about.md"
 SITE_URL="https://syn0126.github.io/"
 SELECTED_ARTICLE=""
 preview_pid=""
@@ -53,6 +54,18 @@ article_state() {
     fi
 }
 
+article_tags() {
+    local file="$1"
+    local tags
+
+    tags="$(sed -n 's/^tags:[[:space:]]*//p' "$file" | head -n 1)"
+    tags="${tags//[\[\]\"\']/}"
+    tags="${tags//,/、}"
+    tags="${tags//[[:space:]]/}"
+
+    print -r -- "${tags:-未分类}"
+}
+
 load_articles() {
     articles=("$POST_DIR"/*.md(NOn))
 }
@@ -69,7 +82,7 @@ print_articles() {
     local file
     for file in "${articles[@]}"; do
         printf "%2d. [%s] %s\n" "$index" "$(article_state "$file")" "$(article_title "$file")"
-        printf "    %s\n" "$(basename "$file")"
+        printf "    标签：%s · %s\n" "$(article_tags "$file")" "$(basename "$file")"
         (( index++ ))
     done
 }
@@ -102,6 +115,38 @@ yaml_escape() {
     print -r -- "$value"
 }
 
+format_tags() {
+    local raw="$1"
+    local tag
+    local escaped_tag
+    local -a values
+    local -a tags
+
+    if [[ -z "${raw//[[:space:]]/}" ]]; then
+        print -r -- '["未分类"]'
+        return
+    fi
+
+    raw="${raw//，/,}"
+    raw="${raw//；/,}"
+    raw="${raw//;/,}"
+    raw="${raw//\#/,}"
+    raw="${raw//[[:space:]]/,}"
+    values=("${(@s:,:)raw}")
+
+    for tag in "${values[@]}"; do
+        [[ -n "$tag" ]] || continue
+        escaped_tag="$(yaml_escape "$tag")"
+        tags+=("\"$escaped_tag\"")
+    done
+
+    if (( ${#tags[@]} == 0 )); then
+        print -r -- '["未分类"]'
+    else
+        print -r -- "[${(j:, :)tags}]"
+    fi
+}
+
 new_article() {
     echo
     echo "新建文章"
@@ -109,6 +154,8 @@ new_article() {
 
     local title
     local description
+    local tags_input
+    local formatted_tags
     local slug
     local default_slug
     local file
@@ -117,12 +164,15 @@ new_article() {
     local escaped_description
     local existing_file
 
-    read -r "?文章标题，直接回车取消：" title
+    read -r "?中文标题，直接回车取消：" title
     [[ -n "${title//[[:space:]]/}" ]] || return
 
+    read -r "?一句话简介（可选，直接回车跳过）：" description
+
     default_slug="post-$(date '+%Y%m%d-%H%M')"
-    read -r "?网址短名，只能使用英文、数字和连字符，直接回车使用 ${default_slug}：" slug
+    read -r "?英文简称（可选，如 ai-tools；直接回车自动生成）：" slug
     slug="${slug:-$default_slug}"
+    slug="${slug:l}"
 
     if [[ ! "$slug" =~ '^[A-Za-z0-9]+(-[A-Za-z0-9]+)*$' ]]; then
         echo "网址短名格式不正确，没有创建文章。"
@@ -139,7 +189,7 @@ new_article() {
         fi
     done
 
-    read -r "?一句话简介，可以直接回车：" description
+    read -r "?标签（可选，如 #思考 #效率；直接回车为“未分类”）：" tags_input
 
     file="$POST_DIR/$(date '+%Y-%m-%d')-${slug}.md"
     if [[ -e "$file" ]]; then
@@ -152,6 +202,7 @@ new_article() {
     article_date="$(date '+%Y-%m-%dT%H:%M:%S%z' | sed -E 's/([+-][0-9]{2})([0-9]{2})$/\1:\2/')"
     escaped_title="$(yaml_escape "$title")"
     escaped_description="$(yaml_escape "$description")"
+    formatted_tags="$(format_tags "$tags_input")"
 
     {
         echo "---"
@@ -159,6 +210,7 @@ new_article() {
         echo "slug: \"$slug\""
         echo "date: $article_date"
         echo "description: \"$escaped_description\""
+        echo "tags: $formatted_tags"
         echo "draft: true"
         echo "---"
         echo
@@ -170,6 +222,7 @@ new_article() {
 
     echo
     echo "已创建草稿：$(basename "$file")"
+    echo "标签：$(article_tags "$file")"
     echo "写完后使用“隐藏或发布文章”把它改成发布状态。"
 
     if ! open -a TextEdit "$file" 2>/dev/null; then
@@ -199,6 +252,17 @@ edit_article() {
     if ! open -a TextEdit "$SELECTED_ARTICLE" 2>/dev/null; then
         open "$SELECTED_ARTICLE" 2>/dev/null || true
         echo "请手动打开：$SELECTED_ARTICLE"
+    fi
+
+    pause_menu
+}
+
+edit_about() {
+    echo
+    echo "正在打开“关于”页…"
+    if ! open -a TextEdit "$ABOUT_FILE" 2>/dev/null; then
+        open "$ABOUT_FILE" 2>/dev/null || true
+        echo "请手动打开：$ABOUT_FILE"
     fi
 
     pause_menu
@@ -337,11 +401,12 @@ while true; do
     echo "1. 新建文章"
     echo "2. 查看文章列表"
     echo "3. 编辑文章"
-    echo "4. 隐藏或发布文章"
-    echo "5. 删除文章（移到废纸篓）"
-    echo "6. 本地预览"
-    echo "7. 一键发布到 GitHub"
-    echo "8. 打开线上博客"
+    echo "4. 编辑“关于”页"
+    echo "5. 隐藏或发布文章"
+    echo "6. 删除文章（移到废纸篓）"
+    echo "7. 本地预览"
+    echo "8. 一键发布到 GitHub"
+    echo "9. 打开线上博客"
     echo "0. 退出"
     echo
 
@@ -351,17 +416,18 @@ while true; do
         1) new_article ;;
         2) list_articles ;;
         3) edit_article ;;
-        4) toggle_article ;;
-        5) delete_article ;;
-        6) preview_site ;;
-        7) publish_site ;;
-        8) open_site ;;
+        4) edit_about ;;
+        5) toggle_article ;;
+        6) delete_article ;;
+        7) preview_site ;;
+        8) publish_site ;;
+        9) open_site ;;
         0)
             echo "已退出。"
             exit 0
             ;;
         *)
-            echo "请输入 0 到 8。"
+            echo "请输入 0 到 9。"
             pause_menu
             ;;
     esac

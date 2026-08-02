@@ -1,0 +1,51 @@
+{{ define "title" }}标签 — {{ .Site.Title }}{{ end }}
+
+{{ define "main" }}
+<section class="tag-overview">
+    <header class="page-header">
+        <h1>标签</h1>
+        <p>按主题浏览文章。</p>
+    </header>
+
+    {{ $uncategorizedTagged := slice }}
+    {{ $uncategorizedPage := false }}
+    {{ range .Data.Terms.Alphabetical }}
+    {{ if eq .Page.LinkTitle "未分类" }}
+        {{ $uncategorizedTagged = .Pages }}
+        {{ $uncategorizedPage = .Page }}
+    {{ else }}
+    <section class="tag-group" id="{{ .Page.LinkTitle }}">
+        <h2><a href="{{ .Page.RelPermalink }}">#{{ .Page.LinkTitle }}</a><span>{{ .Count }} 篇</span></h2>
+        <ul>
+            {{ range .Pages.ByDate.Reverse }}
+            <li>
+                <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+                <time datetime="{{ .Date.Format `2006-01-02` }}">{{ .Date.Format `2006-01-02` }}</time>
+            </li>
+            {{ end }}
+        </ul>
+    </section>
+    {{ end }}
+    {{ end }}
+
+    {{ $posts := where site.RegularPages "Section" "posts" }}
+    {{ $uncategorizedMissing := where $posts "Params.tags" "eq" nil }}
+    {{ $uncategorized := union $uncategorizedTagged $uncategorizedMissing }}
+    {{ with $uncategorized }}
+    <section class="tag-group" id="未分类">
+        <h2>
+            {{ with $uncategorizedPage }}<a href="{{ .RelPermalink }}">#未分类</a>{{ else }}#未分类{{ end }}
+            <span>{{ len . }} 篇</span>
+        </h2>
+        <ul>
+            {{ range sort . "Date" "desc" }}
+            <li>
+                <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+                <time datetime="{{ .Date.Format `2006-01-02` }}">{{ .Date.Format `2006-01-02` }}</time>
+            </li>
+            {{ end }}
+        </ul>
+    </section>
+    {{ end }}
+</section>
+{{ end }}

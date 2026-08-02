@@ -1,0 +1,23 @@
+{{ define "title" }}#{{ .Title }} — {{ .Site.Title }}{{ end }}
+
+{{ define "main" }}
+<section class="section-listing">
+    <header class="page-header">
+        <p class="eyebrow">标签</p>
+        <h1>#{{ .Title }}</h1>
+        <p>共 {{ len .Pages }} 篇文章</p>
+    </header>
+    {{ range .Pages.ByDate.Reverse }}
+    <div class="post-item">
+        <time datetime="{{ .Date.Format `2006-01-02` }}">{{ .Date.Format `2006-01-02` }}</time>
+        <div class="post-summary">
+            <a href="{{ .RelPermalink }}" class="post-link">{{ .Title }}</a>
+            {{ with .Description }}<span class="post-desc">{{ . }}</span>{{ end }}
+        </div>
+    </div>
+    {{ else }}
+    <p class="empty-state">这个标签下还没有文章。</p>
+    {{ end }}
+    <p class="back-link"><a href="{{ `/tags/` | relURL }}">← 返回全部标签</a></p>
+</section>
+{{ end }}

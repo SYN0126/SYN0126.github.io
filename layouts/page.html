@@ -12,6 +12,7 @@
             <span class="reading-time">阅读约 {{ . }} 分钟</span>
             {{ end }}
         </div>
+        {{ partial "post-tags.html" . }}
         {{ with .Description }}
         <p class="post-subtitle">{{ . }}</p>
         {{ end }}

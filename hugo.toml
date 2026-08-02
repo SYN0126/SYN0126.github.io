@@ -1,6 +1,7 @@
-baseURL = "https://SYN0126.github.io"
+baseURL = "https://syn0126.github.io/"
 title = "小龙的博客"
-locale = "zh-cn"
+locale = "zh-CN"
+defaultContentLanguage = "zh"
 
 # Draft posts are not published
 buildDrafts = false
@@ -9,8 +10,14 @@ buildExpired = false
 canonifyURLs = false
 
 # Pagination
-paginate = 20
-paginatePath = "page"
+[pagination]
+  pagerSize = 20
+  path = "page"
+
+# Article tags. Add `tags: ["标签名"]` to a post; the management tool
+# automatically uses “未分类” when no tag is entered.
+[taxonomies]
+  tag = "tags"
 
 # Output formats
 [outputs]

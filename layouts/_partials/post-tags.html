@@ -1,0 +1,10 @@
+{{- $tags := .GetTerms "tags" -}}
+<span class="tag-list" aria-label="文章标签">
+    {{- if $tags -}}
+        {{- range $tags -}}
+        <a class="tag" href="{{ .RelPermalink }}">#{{ .LinkTitle }}</a>
+        {{- end -}}
+    {{- else -}}
+        <a class="tag" href="{{ `/tags/` | relURL }}#未分类">#未分类</a>
+    {{- end -}}
+</span>

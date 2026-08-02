@@ -9,10 +9,13 @@
     {{ range .Pages.ByDate.Reverse }}
     <div class="post-item">
         <time datetime="{{ .Date.Format `2006-01-02` }}">{{ .Date.Format `2006-01-02` }}</time>
-        <a href="{{ .RelPermalink }}" class="post-link">{{ .Title }}</a>
-        {{ with .Description }}
-        <span class="post-desc">{{ . }}</span>
-        {{ end }}
+        <div class="post-summary">
+            <a href="{{ .RelPermalink }}" class="post-link">{{ .Title }}</a>
+            {{ with .Description }}
+            <span class="post-desc">{{ . }}</span>
+            {{ end }}
+            {{ partial "post-tags.html" . }}
+        </div>
     </div>
     {{ else }}
     <p class="empty-state">暂无内容。</p>

@@ -3,6 +3,7 @@ title: "Hello World"
 slug: "hello-world"
 date: 2026-07-15T00:00:00+09:00
 description: "第一篇博客文章，测试一下。"
+tags: ["未分类"]
 draft: false
 ---
 

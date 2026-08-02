@@ -18,6 +18,7 @@
                             {{ with .Description }}
                             <span class="post-desc">{{ . }}</span>
                             {{ end }}
+                            {{ partial "post-tags.html" . }}
                         </li>
                         {{ end }}
                     </ul>
