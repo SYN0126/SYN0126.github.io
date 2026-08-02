@@ -1,0 +1,26 @@
+{{ define "title" }}{{ .Title }} — {{ .Site.Title }}{{ end }}
+
+{{ define "main" }}
+<section class="archive">
+    <header class="archive-header">
+        <h1>{{ .Title }}</h1>
+        <p>共 {{ len (where site.RegularPages "Section" "posts") }} 篇文章</p>
+    </header>
+    {{ $posts := where site.RegularPages "Section" "posts" }}
+    {{ range $posts.GroupByDate "2006" }}
+    <section class="archive-year">
+        <h2>{{ .Key }}</h2>
+        <ul class="archive-list">
+            {{ range .Pages.ByDate.Reverse }}
+            <li>
+                <time datetime="{{ .Date.Format `2006-01-02` }}">{{ .Date.Format `01-02` }}</time>
+                <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+            </li>
+            {{ end }}
+        </ul>
+    </section>
+    {{ else }}
+    <p class="empty-state">暂无文章。</p>
+    {{ end }}
+</section>
+{{ end }}

@@ -4,10 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ block "title" . }}{{ .Site.Title }}{{ end }}</title>
-    {{ if .Description }}
-    <meta name="description" content="{{ .Description }}">
-    {{ else if .IsHome }}
-    <meta name="description" content="{{ .Site.Params.description }}">
+    {{ $description := .Site.Params.description }}
+    {{ with .Description }}{{ $description = . }}{{ end }}
+    <meta name="description" content="{{ $description }}">
+    <link rel="canonical" href="{{ .Permalink }}">
+    <meta property="og:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ end }}">
+    <meta property="og:description" content="{{ $description }}">
+    <meta property="og:type" content="{{ if eq .Section `posts` }}article{{ else }}website{{ end }}">
+    <meta property="og:url" content="{{ .Permalink }}">
+    <meta property="og:site_name" content="{{ .Site.Title }}">
+    {{ $image := "" }}
+    {{ with .Params.image }}{{ $image = . | absURL }}{{ end }}
+    <meta name="twitter:card" content="{{ if $image }}summary_large_image{{ else }}summary{{ end }}">
+    <meta name="twitter:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }}{{ end }}">
+    <meta name="twitter:description" content="{{ $description }}">
+    {{ with $image }}
+    <meta property="og:image" content="{{ . }}">
+    <meta name="twitter:image" content="{{ . }}">
     {{ end }}
     <link rel="alternate" type="application/rss+xml" href="{{ `index.xml` | absURL }}" title="{{ .Site.Title }}">
     {{ $css := resources.Get `css/main.css` | resources.Minify | resources.Fingerprint }}
@@ -15,8 +28,13 @@
 </head>
 <body>
     <header class="site-header">
-        <nav>
+        <nav class="site-nav" aria-label="主导航">
             <a href="{{ site.Home.RelPermalink }}" class="site-title">{{ .Site.Title }}</a>
+            <div class="site-nav-links">
+                <a href="{{ site.Home.RelPermalink }}">首页</a>
+                <a href="{{ `archive/` | relURL }}">归档</a>
+                <a href="{{ `about/` | relURL }}">关于</a>
+            </div>
         </nav>
     </header>
     <main>
