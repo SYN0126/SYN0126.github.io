@@ -9,6 +9,7 @@ SITE_URL="https://syn0126.github.io/"
 SELECTED_ARTICLE=""
 preview_pid=""
 preview_log=""
+publish_temp_dir=""
 
 cd "$SCRIPT_DIR" || exit 1
 
@@ -27,7 +28,14 @@ cleanup_preview() {
     preview_log=""
 }
 
-trap cleanup_preview EXIT INT TERM
+cleanup_publish() {
+    if [[ -n "$publish_temp_dir" && -d "$publish_temp_dir" ]]; then
+        rm -rf -- "$publish_temp_dir"
+    fi
+    publish_temp_dir=""
+}
+
+trap 'cleanup_preview; cleanup_publish' EXIT INT TERM
 
 article_title() {
     local file="$1"
@@ -373,13 +381,142 @@ preview_site() {
 }
 
 publish_site() {
-    if [[ ! -x "$SCRIPT_DIR/发布博客.command" ]]; then
-        echo "没有找到可运行的“发布博客.command”。"
+    local current_branch
+    local changes
+    local publish_answer
+    local commit_message
+
+    echo
+    echo "================================"
+    echo "          一键发布博客"
+    echo "================================"
+    echo
+
+    if ! command -v git >/dev/null 2>&1; then
+        echo "发布没有完成：没有找到 Git。"
+        pause_menu
+        return
+    fi
+    if ! command -v hugo >/dev/null 2>&1; then
+        echo "发布没有完成：没有找到 Hugo。"
+        pause_menu
+        return
+    fi
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        echo "发布没有完成：当前文件夹不是 Git 仓库。"
+        pause_menu
+        return
+    fi
+    if ! git remote get-url origin >/dev/null 2>&1; then
+        echo "发布没有完成：没有找到名为 origin 的远端仓库。"
         pause_menu
         return
     fi
 
-    "$SCRIPT_DIR/发布博客.command"
+    current_branch="$(git branch --show-current)"
+    if [[ "$current_branch" != "main" ]]; then
+        echo "发布没有完成：当前分支是“${current_branch:-未知}”，请切换到 main 后再发布。"
+        pause_menu
+        return
+    fi
+
+    echo "1/4 正在检查网站能否正常构建…"
+    publish_temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/blog-publish.XXXXXX")" || {
+        echo "发布没有完成：无法创建临时文件夹。"
+        pause_menu
+        return
+    }
+
+    if ! hugo \
+        --destination "$publish_temp_dir/public" \
+        --cacheDir "$publish_temp_dir/cache" \
+        --noBuildLock \
+        --cleanDestinationDir \
+        --minify \
+        --printPathWarnings \
+        --panicOnWarning; then
+        echo "发布没有完成：网站构建失败。请先根据上面的错误信息修改内容。"
+        cleanup_publish
+        pause_menu
+        return
+    fi
+
+    echo
+    echo "2/4 本次检测到的文件变化："
+    changes="$(git -c core.quotepath=false status --short)"
+
+    if [[ -z "$changes" ]]; then
+        echo "没有新的文件变化。将尝试推送尚未发布的本地提交。"
+        echo
+        echo "3/4 不需要创建新提交。"
+        echo "4/4 正在推送到 GitHub…"
+        if ! git push origin main; then
+            echo "发布没有完成：推送失败。请检查网络或上面的 Git 提示。"
+            cleanup_publish
+            pause_menu
+            return
+        fi
+        echo
+        echo "发布完成。GitHub Pages 稍后会自动更新网站。"
+        cleanup_publish
+        pause_menu
+        return
+    fi
+
+    echo "$changes"
+    echo
+    read -r "?确认发布以上变化吗？直接回车表示确认，输入 n 取消：[Y/n] " publish_answer
+
+    if [[ "$publish_answer" == [nN] || "$publish_answer" == [nN][oO] ]]; then
+        echo "已取消，没有提交或推送任何内容。"
+        cleanup_publish
+        pause_menu
+        return
+    fi
+
+    echo
+    read -r "?请输入这次更新的说明，直接回车会自动生成：" commit_message
+    if [[ -z "${commit_message//[[:space:]]/}" ]]; then
+        commit_message="更新博客 $(date '+%Y-%m-%d %H:%M')"
+    fi
+
+    echo
+    echo "3/4 正在创建本地提交：$commit_message"
+    if ! git add -A; then
+        echo "发布没有完成：无法把文件加入本次提交。"
+        cleanup_publish
+        pause_menu
+        return
+    fi
+
+    if git diff --cached --quiet; then
+        echo "发布没有完成：没有可以提交的文件，可能所有变化都被忽略了。"
+        cleanup_publish
+        pause_menu
+        return
+    fi
+
+    git -c core.quotepath=false diff --cached --stat
+    if ! git commit -m "$commit_message"; then
+        echo "发布没有完成：创建本地提交失败。"
+        cleanup_publish
+        pause_menu
+        return
+    fi
+
+    echo
+    echo "4/4 正在推送到 GitHub…"
+    if ! git push origin main; then
+        echo "本地提交已经保存，但推送失败。检查网络后再次运行本工具即可继续推送。"
+        cleanup_publish
+        pause_menu
+        return
+    fi
+
+    echo
+    echo "发布完成。GitHub Pages 稍后会自动更新网站。"
+    cleanup_publish
+    pause_menu
 }
 
 open_site() {
