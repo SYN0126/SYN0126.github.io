@@ -4,10 +4,10 @@ set -u
 
 SCRIPT_DIR="${0:A:h}"
 POST_DIR="$SCRIPT_DIR/content/posts"
-SITE_URL="https://syn0126.github.io/"
 SELECTED_ARTICLE=""
 preview_pid=""
 preview_log=""
+publish_temp=""
 
 cd "$SCRIPT_DIR" || exit 1
 
@@ -22,8 +22,12 @@ cleanup_preview() {
         wait "$preview_pid" 2>/dev/null
     fi
     [[ -n "$preview_log" ]] && rm -f -- "$preview_log"
+    if [[ -n "$publish_temp" && -d "$publish_temp" ]]; then
+        rm -rf -- "$publish_temp"
+    fi
     preview_pid=""
     preview_log=""
+    publish_temp=""
 }
 
 trap cleanup_preview EXIT INT TERM
@@ -308,20 +312,145 @@ preview_site() {
     cleanup_preview
 }
 
+publish_error() {
+    echo
+    echo "发布没有完成：$1"
+    pause_menu
+    return 1
+}
+
 publish_site() {
-    if [[ ! -x "$SCRIPT_DIR/发布博客.command" ]]; then
-        echo "没有找到可运行的“发布博客.command”。"
+    local current_branch
+    local temp_dir
+    local changes
+    local publish_answer
+    local commit_message
+
+    command -v git >/dev/null 2>&1 || {
+        publish_error "没有找到 Git。"
+        return
+    }
+    command -v hugo >/dev/null 2>&1 || {
+        publish_error "没有找到 Hugo。"
+        return
+    }
+    git rev-parse --is-inside-work-tree >/dev/null 2>&1 || {
+        publish_error "当前文件夹不是 Git 仓库。"
+        return
+    }
+    git remote get-url origin >/dev/null 2>&1 || {
+        publish_error "没有找到名为 origin 的远端仓库。"
+        return
+    }
+
+    current_branch="$(git branch --show-current)"
+    if [[ "$current_branch" != "main" ]]; then
+        publish_error "当前分支是“${current_branch:-未知}”，请切换到 main 后再发布。"
+        return
+    fi
+
+    echo
+    echo "1/4 正在检查网站能否正常构建…"
+    temp_dir="$(mktemp -d "${TMPDIR:-/tmp}/blog-publish.XXXXXX")" || {
+        publish_error "无法创建临时文件夹。"
+        return
+    }
+    publish_temp="$temp_dir"
+
+    if ! hugo \
+        --destination "$temp_dir/public" \
+        --cacheDir "$temp_dir/cache" \
+        --noBuildLock \
+        --cleanDestinationDir \
+        --minify \
+        --printPathWarnings \
+        --panicOnWarning; then
+        rm -rf -- "$temp_dir"
+        publish_temp=""
+        publish_error "网站构建失败。请先根据上面的错误信息修改内容。"
+        return
+    fi
+    rm -rf -- "$temp_dir"
+    publish_temp=""
+
+    echo
+    echo "2/4 本次检测到的文件变化："
+    changes="$(git -c core.quotepath=false status --short)"
+
+    if [[ -z "$changes" ]]; then
+        echo "没有新的文件变化。将尝试推送尚未发布的本地提交。"
+        echo
+        echo "3/4 不需要创建新提交。"
+        echo "4/4 正在推送到 GitHub…"
+        if git push origin main; then
+            echo
+            echo "发布完成。GitHub Pages 稍后会自动更新网站。"
+        else
+            publish_error "推送失败。请检查网络或上面的 Git 提示。"
+            return
+        fi
         pause_menu
         return
     fi
 
-    "$SCRIPT_DIR/发布博客.command"
+    echo "$changes"
+    echo
+    read -r "?确认发布以上变化吗？直接回车表示确认，输入 n 取消：[Y/n] " publish_answer
+
+    if [[ "$publish_answer" == [nN] || "$publish_answer" == [nN][oO] ]]; then
+        echo "已取消，没有提交或推送任何内容。"
+        pause_menu
+        return
+    fi
+
+    echo
+    read -r "?请输入这次更新的说明，直接回车会自动生成：" commit_message
+    if [[ -z "${commit_message//[[:space:]]/}" ]]; then
+        commit_message="更新博客 $(date '+%Y-%m-%d %H:%M')"
+    fi
+
+    echo
+    echo "3/4 正在创建本地提交：$commit_message"
+    git add -A || {
+        publish_error "无法把文件加入本次提交。"
+        return
+    }
+    if git diff --cached --quiet; then
+        publish_error "没有可以提交的文件，可能所有变化都被 .gitignore 忽略了。"
+        return
+    fi
+    git -c core.quotepath=false diff --cached --stat
+    git commit -m "$commit_message" || {
+        publish_error "创建本地提交失败。"
+        return
+    }
+
+    echo
+    echo "4/4 正在推送到 GitHub…"
+    if git push origin main; then
+        echo
+        echo "发布完成。GitHub Pages 稍后会自动更新网站。"
+    else
+        publish_error "本地提交已经保存，但推送失败。检查网络后再次运行本工具即可继续推送。"
+        return
+    fi
+    pause_menu
 }
 
 open_site() {
-    open "$SITE_URL" 2>/dev/null || echo "请在浏览器打开：$SITE_URL"
+    local site_url
+    site_url="$(sed -n 's/^baseURL[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' "$SCRIPT_DIR/hugo.toml" | head -n 1)"
+    site_url="${site_url%/}/"
+
+    if [[ "$site_url" == "/" ]]; then
+        echo "无法从 hugo.toml 读取网站地址。"
+        pause_menu
+        return
+    fi
+
+    open "$site_url" 2>/dev/null || echo "请在浏览器打开：$site_url"
     echo
-    echo "已打开：$SITE_URL"
+    echo "已打开：$site_url"
     pause_menu
 }
 

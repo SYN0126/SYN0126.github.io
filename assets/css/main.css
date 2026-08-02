@@ -40,6 +40,26 @@ a {
     transition: opacity 0.15s;
 }
 a:hover { opacity: 0.6; }
+a:focus-visible {
+    outline: 2px solid #1a1a1a;
+    outline-offset: 3px;
+    border-radius: 2px;
+}
+
+.skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 10;
+    padding: 0.5rem 0.75rem;
+    color: #fff;
+    background: #1a1a1a;
+    text-decoration: none;
+    transform: translateY(-200%);
+}
+.skip-link:focus {
+    transform: translateY(0);
+}
 
 /* ============================================================
    Header & Footer
@@ -72,6 +92,10 @@ a:hover { opacity: 0.6; }
 .site-nav-links a:hover {
     color: #1a1a1a;
 }
+.site-nav-links a[aria-current="page"] {
+    color: #1a1a1a;
+    font-weight: 600;
+}
 
 .site-footer {
     margin-top: 4rem;
@@ -80,11 +104,19 @@ a:hover { opacity: 0.6; }
     font-size: 0.875rem;
     color: #999;
 }
-.site-footer a { color: #999; }
 
 /* ============================================================
    Timeline (Homepage)
    ============================================================ */
+.home-intro {
+    margin-bottom: 2.5rem;
+}
+.home-intro h1 {
+    margin-bottom: 0.5rem;
+}
+.home-intro p {
+    color: #666;
+}
 .timeline-year {
     margin-bottom: 2.5rem;
 }
@@ -143,6 +175,10 @@ a:hover { opacity: 0.6; }
     font-size: 0.8125rem;
     color: #999;
     margin-left: 0.6rem;
+}
+.view-all {
+    margin-top: 2rem;
+    font-size: 0.875rem;
 }
 
 /* ============================================================

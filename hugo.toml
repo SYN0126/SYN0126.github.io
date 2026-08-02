@@ -1,21 +1,15 @@
-baseURL = "https://SYN0126.github.io"
+baseURL = "https://syn0126.github.io/"
 title = "小龙的博客"
-locale = "zh-cn"
+defaultContentLanguage = "zh-cn"
+locale = "zh-CN"
 
-# Draft posts are not published
-buildDrafts = false
-buildFuture = false
-buildExpired = false
-canonifyURLs = false
-
-# Pagination
-paginate = 20
-paginatePath = "page"
+# Tags and categories are disabled until the site actually uses them.
+disableKinds = ["taxonomy", "term"]
 
 # Output formats
 [outputs]
   home = ["HTML", "RSS"]
-  section = ["HTML", "RSS"]
+  section = ["HTML"]
   page = ["HTML"]
 
 # Clean URLs: /hello-world/ instead of /posts/hello-world/
@@ -36,3 +30,4 @@ paginatePath = "page"
 [params]
   author = "小龙"
   description = "记录思考，分享观点。"
+  defaultImage = "/images/social-card.jpg"
