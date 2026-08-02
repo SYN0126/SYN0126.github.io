@@ -4,7 +4,6 @@
 <article class="post">
     <header class="post-header">
         <h1>{{ .Title }}</h1>
-        {{ if eq .Section "posts" }}
         <div class="post-meta">
             <time datetime="{{ .Date.Format `2006-01-02T15:04:05Z07:00` }}">
                 {{ .Date.Format `2006 年 1 月 2 日` }}
@@ -13,7 +12,6 @@
             <span class="reading-time">阅读约 {{ . }} 分钟</span>
             {{ end }}
         </div>
-        {{ end }}
         {{ with .Description }}
         <p class="post-subtitle">{{ . }}</p>
         {{ end }}
@@ -22,23 +20,7 @@
         {{ .Content }}
     </div>
     <footer class="post-footer">
-        {{ if eq .Section "posts" }}
-        <nav class="post-navigation" aria-label="文章导航">
-            <div class="post-navigation-item post-navigation-previous">
-                {{ with .PrevInSection }}
-                <span>上一篇</span>
-                <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-                {{ end }}
-            </div>
-            <div class="post-navigation-item post-navigation-next">
-                {{ with .NextInSection }}
-                <span>下一篇</span>
-                <a href="{{ .RelPermalink }}">{{ .Title }}</a>
-                {{ end }}
-            </div>
-        </nav>
-        {{ end }}
-        <a class="back-home" href="{{ site.Home.RelPermalink }}">← 返回首页</a>
+        <a href="{{ site.Home.RelPermalink }}">← 返回首页</a>
     </footer>
 </article>
 {{ end }}
