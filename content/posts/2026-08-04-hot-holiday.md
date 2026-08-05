@@ -4,7 +4,7 @@ slug: "hot-holiday"
 date: 2026-08-04T13:21:54+09:00
 description: "放假回家的感想"
 tags: ["感想"]
-draft: true
+draft: false
 ---
 
 # 第一站：从上海回到长春
