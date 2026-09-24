@@ -1,0 +1,129 @@
+/* Personal typography overrides. Keep Pure's original theme styles untouched. */
+:root {
+  --font-zh: "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", "Noto Sans SC", sans-serif;
+  --zh-letter-spacing: 0.025em;
+  --zh-line-height: 1.75;
+  --zh-prose-line-height: 1.9;
+  --glass-bg: hsl(var(--background) / 0.46);
+  --glass-card-bg: hsl(var(--background) / 0.58);
+  --glass-card-sheen: linear-gradient(135deg, hsl(0 0% 100% / 0.10), hsl(0 0% 100% / 0.025));
+  --glass-border: hsl(var(--foreground) / 0.15);
+  --glass-border-hover: hsl(var(--foreground) / 0.23);
+  --glass-shadow: 0 12px 32px hsl(225 30% 20% / 0.10), inset 0 1px 0 hsl(0 0% 100% / 0.34);
+  --glass-hover-color: hsl(var(--foreground) / 0.045);
+}
+
+.dark {
+  --glass-bg: hsl(var(--background) / 0.38);
+  --glass-card-bg: hsl(var(--background) / 0.52);
+  --glass-card-sheen: linear-gradient(135deg, hsl(0 0% 100% / 0.045), transparent);
+  --glass-border: hsl(var(--foreground) / 0.17);
+  --glass-border-hover: hsl(var(--foreground) / 0.26);
+  --glass-shadow: 0 14px 36px hsl(0 0% 0% / 0.24), inset 0 1px 0 hsl(0 0% 100% / 0.08);
+  --glass-hover-color: hsl(var(--foreground) / 0.055);
+}
+
+/* Shared translucent surfaces over the animated shader background. */
+.glass-surface,
+.glass-control,
+header-component.not-top,
+header-component.expanded.not-top #headerExpandContent {
+  border-color: var(--glass-border) !important;
+  background-color: var(--glass-bg) !important;
+  color: hsl(var(--foreground)) !important;
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-control,
+header-component.not-top,
+header-component.expanded.not-top #headerExpandContent {
+  -webkit-backdrop-filter: blur(24px) saturate(1.35);
+  backdrop-filter: blur(24px) saturate(1.35);
+}
+
+.glass-surface,
+.glass-control {
+  transition-property: border-color, color !important;
+  transition-duration: 180ms !important;
+}
+
+/* Keep the blur and shadow geometry completely static. The hover tint lives on
+ * a fixed-size overlay so Chromium only animates opacity, not filtered layers. */
+.glass-surface {
+  position: relative;
+  isolation: isolate;
+  contain: paint;
+  overflow: hidden;
+  background-color: var(--glass-card-bg) !important;
+  background-image: var(--glass-card-sheen);
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.glass-surface::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background-color: var(--glass-hover-color);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+}
+
+.glass-surface:hover::after {
+  opacity: 1;
+}
+
+.glass-surface:hover {
+  border-color: var(--glass-border-hover) !important;
+  background-color: var(--glass-card-bg) !important;
+  color: hsl(var(--foreground)) !important;
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-control:hover {
+  border-color: var(--glass-border-hover) !important;
+  background-color: var(--glass-bg) !important;
+  color: hsl(var(--foreground)) !important;
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-surface .text-muted-foreground {
+  color: hsl(var(--foreground) / 0.72) !important;
+}
+
+@media (max-width: 640px) {
+  .glass-control,
+  header-component.not-top,
+  header-component.expanded.not-top #headerExpandContent {
+    -webkit-backdrop-filter: blur(20px) saturate(1.3);
+    backdrop-filter: blur(20px) saturate(1.3);
+  }
+}
+
+html:lang(zh-CN) body {
+  font-family: var(--font-zh);
+  line-height: var(--zh-line-height);
+  letter-spacing: var(--zh-letter-spacing);
+}
+
+html:lang(zh-CN) .prose {
+  line-height: var(--zh-prose-line-height);
+  letter-spacing: var(--zh-letter-spacing);
+}
+
+html:lang(zh-CN) .prose p,
+html:lang(zh-CN) .prose ul,
+html:lang(zh-CN) .prose ol,
+html:lang(zh-CN) .prose blockquote {
+  margin-block: 1.25em;
+}
+
+html:lang(zh-CN) code,
+html:lang(zh-CN) pre,
+html:lang(zh-CN) kbd,
+html:lang(zh-CN) samp {
+  letter-spacing: normal;
+}

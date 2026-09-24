@@ -1,0 +1,81 @@
+---
+interface Props {
+  currentPage: number
+  totalPages: number
+  baseUrl: string
+}
+
+const { currentPage, totalPages, baseUrl } = Astro.props
+
+const pageUrl = (page: number) => page === 1 ? baseUrl : `${baseUrl}/${page}`
+
+type PageItem = number | 'ellipsis'
+const pageItems: PageItem[] = []
+
+if (totalPages <= 7) {
+  for (let page = 1; page <= totalPages; page += 1) pageItems.push(page)
+} else {
+  const visiblePages = new Set([
+    1,
+    totalPages,
+    currentPage - 1,
+    currentPage,
+    currentPage + 1
+  ].filter((page) => page >= 1 && page <= totalPages))
+  const sortedPages = [...visiblePages].sort((a, b) => a - b)
+
+  sortedPages.forEach((page, index) => {
+    if (index > 0 && page - sortedPages[index - 1] > 1) pageItems.push('ellipsis')
+    pageItems.push(page)
+  })
+}
+---
+
+{
+  totalPages > 1 && (
+    <nav class='mt-4 flex flex-wrap items-center justify-center gap-2 sm:mt-6' aria-label='Blog pagination'>
+      {currentPage > 1 && (
+        <a
+          class='me-auto rounded-lg px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-primary'
+          href={pageUrl(currentPage - 1)}
+          rel='prev'
+          data-astro-prefetch
+        >
+          ← Previous
+        </a>
+      )}
+
+      <div class='flex flex-wrap items-center justify-center gap-1.5'>
+        {pageItems.map((item) => item === 'ellipsis' ? (
+          <span class='px-1 text-muted-foreground' aria-hidden='true'>…</span>
+        ) : (
+          <a
+            class:list={[
+              'inline-flex min-h-9 min-w-9 items-center justify-center rounded-lg border px-2 text-sm no-underline transition-colors',
+              item === currentPage
+                ? 'bg-foreground text-background'
+                : 'bg-muted text-muted-foreground hover:bg-card hover:text-primary'
+            ]}
+            href={pageUrl(item)}
+            aria-current={item === currentPage ? 'page' : undefined}
+            aria-label={`Page ${item}`}
+            data-astro-prefetch
+          >
+            {item}
+          </a>
+        ))}
+      </div>
+
+      {currentPage < totalPages && (
+        <a
+          class='ms-auto rounded-lg px-2 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-primary'
+          href={pageUrl(currentPage + 1)}
+          rel='next'
+          data-astro-prefetch
+        >
+          Next →
+        </a>
+      )}
+    </nav>
+  )
+}

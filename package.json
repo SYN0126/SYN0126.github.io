@@ -1,0 +1,30 @@
+{
+  "name": "xiaolong-glow-blog",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro-pure check && astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "sync": "astro sync",
+    "pure": "astro-pure",
+    "migrate": "node scripts/migrate-hugo.mjs",
+    "cache:covers": "node scripts/cache-cover-images.mjs"
+  },
+  "dependencies": {
+    "@astrojs/compiler-rs": "^0.1.10",
+    "@astrojs/check": "0.9.9",
+    "@astrojs/rss": "4.0.18",
+    "@waline/client": "^3.13.0",
+    "astro": "6.2.1",
+    "astro-pure": "1.4.7",
+    "gray-matter": "^4.0.3",
+    "katex": "^0.16.45",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "sharp": "^0.34.5",
+    "typescript": "^6.0.3"
+  }
+}

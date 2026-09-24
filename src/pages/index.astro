@@ -1,0 +1,55 @@
+---
+import { Image } from 'astro:assets'
+
+import { Quote } from 'astro-pure/advanced'
+import PostPreview from '@/components/pages/PostPreview.astro'
+import { getBlogCollection, sortMDByDate } from 'astro-pure/server'
+import { Button, Icon, Label } from 'astro-pure/user'
+import PageLayout from '@/layouts/BaseLayout.astro'
+import Section from '@/components/home/Section.astro'
+import config from '@/site-config'
+
+const MAX_POSTS = 8
+const allPosts = await getBlogCollection()
+const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS)
+const imagePath = config.logo.src
+const images = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/assets/*.{jpeg,jpg,png,gif,avif,webp}'
+)
+if (!images[imagePath])
+  throw new Error(`"${imagePath}" does not exist in glob: "src/assets/*.{jpeg,jpg,png,gif,avif,webp}"`)
+---
+
+<PageLayout meta={{ title: 'Home' }} highlightColor=''>
+  <main class='flex w-full flex-col items-center'>
+    <section class='animate mb-10 flex flex-col items-center gap-y-7' id='content-header'>
+      <Image src={images[imagePath]()} alt={config.logo.alt || 'Profile'} class='size-28 rounded-full border object-cover p-1' loading='eager' fetchpriority='high' />
+      <div class='flex flex-col items-center gap-y-4'>
+        <h1 class='text-3xl font-medium'>{config.author}</h1>
+        <div class='flex flex-wrap justify-center gap-x-7 gap-y-3'>
+          <Label title='个人博客'><Icon name='location' class='size-5' slot='icon' /></Label>
+          <Label title='GitHub' as='a' href='https://github.com/SYN0126' target='_blank'><Icon name='github' class='size-5' slot='icon' /></Label>
+          <Label title='RSS' as='a' href='/rss.xml'><Icon name='rss' class='size-5' slot='icon' /></Label>
+        </div>
+      </div>
+    </section>
+
+    <div id='content' class='animate flex flex-col gap-y-10 md:w-4/5 lg:w-5/6'>
+      <Section title='About'>
+        <p class='text-muted-foreground'>记录思考，分享观点。</p>
+        <Button title='More about me' class='glass-control w-fit self-end' href='/about' variant='ahead' />
+      </Section>
+      {allPostsByDate.length > 0 && (
+        <Section title='Posts'>
+          <ul class='flex flex-col gap-y-1.5 sm:gap-y-2'>
+            {allPostsByDate.map((p) => (
+              <li class='flex flex-col gap-x-2 sm:flex-row'><PostPreview post={p} /></li>
+            ))}
+          </ul>
+          <Button title='More posts' class='glass-control w-fit self-end' href='/blog' variant='ahead' />
+        </Section>
+      )}
+    </div>
+    <Quote class='mt-12 max-w-full' />
+  </main>
+</PageLayout>

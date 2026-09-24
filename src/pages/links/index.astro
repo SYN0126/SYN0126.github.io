@@ -1,0 +1,25 @@
+---
+import links from '@/public/links.json'
+import config from 'virtual:config'
+
+import { Collapse, Timeline } from 'astro-pure/user'
+import PageLayout from '@/layouts/CommonPage.astro'
+import FriendList from '@/components/links/FriendList.astro'
+
+const headings = [
+  { depth: 2, slug: 'common-links', text: 'Common Links' },
+  { depth: 2, slug: 'apply-links', text: 'Apply Links' }
+]
+const { friends } = links
+const linksConf = config.integ.links
+---
+
+<PageLayout title='Links' {headings}>
+  <p>朋友们的站点会显示在这里。</p>
+  <h2 id='common-links'>Common Links</h2>
+  <FriendList list={friends[0]} />
+  <Collapse title='Links with Bad Status'><FriendList list={friends[1]} /></Collapse>
+  <Collapse title='Link History Book'><Timeline events={linksConf.logbook} /></Collapse>
+  <h2 id='apply-links'>Apply Links</h2>
+  <p>暂未开放友链申请。</p>
+</PageLayout>

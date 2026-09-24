@@ -1,0 +1,14 @@
+---
+import PageLayout from '@/layouts/CommonPage.astro'
+import { Content, frontmatter, getHeadings } from '../../content/about.md'
+
+const headings = getHeadings()
+---
+
+<PageLayout
+  title={frontmatter.title ?? '关于'}
+  {headings}
+  highlightColor={frontmatter.highlightColor ?? '#abcdef'}
+>
+  <Content />
+</PageLayout>

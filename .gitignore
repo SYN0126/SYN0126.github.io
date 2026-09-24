@@ -1,9 +1,9 @@
-# Hugo build output
-/public/
-
-# Hugo cache
-/resources/_gen/
-.hugo_build.lock
-
-# macOS
+node_modules/
+dist/
+.astro/
 .DS_Store
+*.log
+legacy-hugo/
+waline-astro-import.json
+template/
+.obsidian/

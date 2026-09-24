@@ -1,0 +1,6 @@
+{
+  "friends": [
+    { "id_name": "common-links", "desc": "Friends", "link_list": [] },
+    { "id_name": "inactive-links", "desc": "Inactive links", "link_list": [] }
+  ]
+}

@@ -1,0 +1,18 @@
+---
+import { Button } from 'astro-pure/user'
+import PageLayout from '@/layouts/BaseLayout.astro'
+
+const meta = {
+  description: '好像似乎可能也许出现了什么问题',
+  title: '404'
+}
+---
+
+<PageLayout {meta}>
+  <div class='px-4 py-10 text-center sm:px-6 lg:px-8'>
+    <h1 class='block text-7xl font-bold sm:text-9xl'>404</h1>
+    <p class='mt-3 text-muted-foreground'>Oops, something went wrong.</p>
+    <p class='text-lg'>Sorry, we couldn't find your page.</p>
+    <Button title='Back to home' href='/' variant='ahead' class='glass-control mt-5' />
+  </div>
+</PageLayout>

@@ -1,0 +1,336 @@
+---
+// Adapted from a shader by Benoit Marini (2020).
+// Source: https://www.shadertoy.com/view/WtjyzR
+// License: CC BY-NC-SA 3.0 Unported.
+---
+
+<div class="shader-background" data-shader-background aria-hidden="true">
+  <canvas></canvas>
+</div>
+
+<a
+  class="shader-credit"
+  href="https://www.shadertoy.com/view/WtjyzR"
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label="Background shader by Benoit Marini on Shadertoy"
+>
+  Shader: Benoit Marini
+</a>
+
+<script>
+  type ShaderWindow = Window & {
+    __dendrobiumShaderCleanup?: () => void
+  }
+
+  const shaderWindow = window as ShaderWindow
+  // Astro view transitions do not always emit pagehide. Dispose the previous
+  // renderer before initializing the canvas swapped in by the next page.
+  shaderWindow.__dendrobiumShaderCleanup?.()
+
+  const host = document.querySelector<HTMLElement>('[data-shader-background]')
+  const canvas = host?.querySelector<HTMLCanvasElement>('canvas')
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+  if (host && canvas && !reduceMotion.matches) {
+    const gl = canvas.getContext('webgl2', {
+      alpha: false,
+      antialias: false,
+      depth: false,
+      stencil: false,
+      powerPreference: 'low-power'
+    })
+
+    if (gl) {
+      const mobile = window.matchMedia('(max-width: 767px), (pointer: coarse)').matches
+      const layers = 16
+      // ITER affects both detail and colour, so keep the reduction modest.
+      const iterations = mobile ? 18 : 20
+      let renderScale = mobile ? 0.52 : 0.72
+      const minimumRenderScale = mobile ? 0.42 : 0.56
+      const frameInterval = 1000 / (mobile ? 45 : 60)
+
+      const vertexSource = `#version 300 es
+        const vec2 positions[3] = vec2[3](
+          vec2(-1.0, -1.0),
+          vec2( 3.0, -1.0),
+          vec2(-1.0,  3.0)
+        );
+
+        void main() {
+          gl_Position = vec4(positions[gl_VertexID], 0.0, 1.0);
+        }
+      `
+
+      const fragmentSource = `#version 300 es
+        precision highp float;
+
+        uniform vec3 iResolution;
+        uniform float iTime;
+
+        out vec4 outputColor;
+
+        #define NUM_LAYERS ${layers}.0
+        #define ITER ${iterations}
+
+        vec4 tex(vec3 p) {
+          float t = iTime + 78.0;
+          vec4 o = vec4(p.xyz, 3.0 * sin(t * 0.1));
+          vec4 dec = vec4(1.0, 0.9, 0.1, 0.15)
+            + vec4(0.06 * cos(t * 0.1), 0.0, 0.0, 0.14 * cos(t * 0.23));
+
+          for (int i = 0; i++ < ITER;) {
+            o.xzyw = abs(o / dot(o, o) - dec);
+          }
+
+          return o;
+        }
+
+        void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+          vec2 uv = (fragCoord - iResolution.xy * 0.5) / iResolution.y;
+          vec3 col = vec3(0.0);
+          float t = iTime * 0.3;
+
+          for (float i = 0.0; i <= 1.0; i += 1.0 / NUM_LAYERS) {
+            float d = fract(i + t);
+            float s = mix(5.0, 0.5, d);
+            float fade = d * smoothstep(1.0, 0.9, d);
+            col += tex(vec3(uv * s, i * 4.0)).xyz * fade;
+          }
+
+          col /= NUM_LAYERS;
+          col *= vec3(2.0, 1.0, 2.0);
+          col = pow(col, vec3(0.5));
+          fragColor = vec4(col, 1.0);
+        }
+
+        void main() {
+          mainImage(outputColor, gl_FragCoord.xy);
+        }
+      `
+
+      const compileShader = (type: number, source: string) => {
+        const shader = gl.createShader(type)
+        if (!shader) return null
+        gl.shaderSource(shader, source)
+        gl.compileShader(shader)
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.warn('Background shader failed to compile:', gl.getShaderInfoLog(shader))
+          gl.deleteShader(shader)
+          return null
+        }
+        return shader
+      }
+
+      const vertexShader = compileShader(gl.VERTEX_SHADER, vertexSource)
+      const fragmentShader = compileShader(gl.FRAGMENT_SHADER, fragmentSource)
+
+      if (vertexShader && fragmentShader) {
+        const program = gl.createProgram()
+        gl.attachShader(program, vertexShader)
+        gl.attachShader(program, fragmentShader)
+        gl.linkProgram(program)
+
+        if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
+          gl.useProgram(program)
+          const vertexArray = gl.createVertexArray()
+          gl.bindVertexArray(vertexArray)
+
+          const resolutionLocation = gl.getUniformLocation(program, 'iResolution')
+          const timeLocation = gl.getUniformLocation(program, 'iTime')
+          const startedAt = performance.now()
+          let lastFrame = 0
+          let animationFrame = 0
+          let slowFrameCount = 0
+          let stopped = false
+
+          const resize = () => {
+            const width = Math.max(1, Math.round(window.innerWidth * renderScale))
+            const height = Math.max(1, Math.round(window.innerHeight * renderScale))
+            if (canvas.width !== width || canvas.height !== height) {
+              canvas.width = width
+              canvas.height = height
+              gl.viewport(0, 0, width, height)
+            }
+          }
+
+          const render = (now: number) => {
+            if (stopped) return
+            animationFrame = requestAnimationFrame(render)
+            const frameGap = now - lastFrame
+            if (document.hidden || (lastFrame > 0 && frameGap < frameInterval - 1)) return
+
+            // If the browser repeatedly misses the target cadence (for example
+            // after thermal throttling), lower resolution before FPS collapses.
+            if (lastFrame > 0 && frameGap > frameInterval * 1.8) {
+              slowFrameCount += 1
+            } else {
+              slowFrameCount = Math.max(0, slowFrameCount - 1)
+            }
+
+            if (slowFrameCount >= 12 && renderScale > minimumRenderScale) {
+              renderScale = Math.max(minimumRenderScale, renderScale - 0.06)
+              slowFrameCount = 0
+            }
+
+            lastFrame = now
+            resize()
+            gl.uniform3f(resolutionLocation, canvas.width, canvas.height, 1)
+            gl.uniform1f(timeLocation, (now - startedAt) / 1000)
+            gl.drawArrays(gl.TRIANGLES, 0, 3)
+          }
+
+          host.classList.add('is-active')
+          animationFrame = requestAnimationFrame(render)
+
+          const handlePageHide = (event: PageTransitionEvent) => {
+            // A page stored in the browser's back-forward cache is only frozen,
+            // not destroyed. Keep its WebGL context alive so the background can
+            // continue when the user returns with the browser Back button.
+            if (!event.persisted) cleanup()
+          }
+
+          const handlePageShow = (event: PageTransitionEvent) => {
+            if (!event.persisted || stopped) return
+
+            // Avoid treating the time spent frozen in bfcache as a slow frame,
+            // and explicitly schedule rendering again for browsers that drop a
+            // pending animation frame while the document is cached.
+            cancelAnimationFrame(animationFrame)
+            lastFrame = performance.now()
+            resize()
+            animationFrame = requestAnimationFrame(render)
+          }
+
+          const cleanup = () => {
+            if (stopped) return
+            stopped = true
+            cancelAnimationFrame(animationFrame)
+            document.removeEventListener('astro:before-swap', cleanup)
+            window.removeEventListener('pagehide', handlePageHide)
+            window.removeEventListener('pageshow', handlePageShow)
+            gl.deleteVertexArray(vertexArray)
+            gl.deleteProgram(program)
+            gl.getExtension('WEBGL_lose_context')?.loseContext()
+            if (shaderWindow.__dendrobiumShaderCleanup === cleanup) {
+              delete shaderWindow.__dendrobiumShaderCleanup
+            }
+          }
+
+          shaderWindow.__dendrobiumShaderCleanup = cleanup
+          document.addEventListener('astro:before-swap', cleanup, { once: true })
+          window.addEventListener('pagehide', handlePageHide)
+          window.addEventListener('pageshow', handlePageShow)
+        } else {
+          console.warn('Background shader failed to link:', gl.getProgramInfoLog(program))
+        }
+
+        gl.deleteShader(vertexShader)
+        gl.deleteShader(fragmentShader)
+      }
+    }
+  }
+</script>
+
+<style>
+  .shader-background {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 20% 15%, rgb(192 132 252 / 24%), transparent 42%),
+      radial-gradient(circle at 82% 75%, rgb(244 114 182 / 18%), transparent 45%),
+      hsl(var(--background));
+  }
+
+  .shader-background::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background: transparent;
+    transition: background-color 250ms ease;
+  }
+
+  .shader-background canvas {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    filter: none;
+    transition: opacity 700ms ease;
+  }
+
+  .shader-background.is-active canvas {
+    opacity: 0.9;
+  }
+
+  .shader-credit {
+    position: fixed;
+    right: max(0.65rem, env(safe-area-inset-right));
+    bottom: max(0.45rem, env(safe-area-inset-bottom));
+    z-index: 20;
+    color: hsl(var(--muted-foreground));
+    font-size: 0.625rem;
+    line-height: 1;
+    opacity: 0.52;
+    transition: opacity 150ms ease;
+  }
+
+  .shader-credit:hover,
+  .shader-credit:focus-visible {
+    opacity: 1;
+  }
+
+  :global(.dark) .shader-background.is-active canvas {
+    opacity: 0.88;
+    filter: invert(1) hue-rotate(180deg) brightness(0.42) saturate(1.12);
+  }
+
+  :global(body.shader-reading) .shader-background canvas {
+    transform: scale(1.045);
+    filter: blur(14px) saturate(0.78);
+  }
+
+  :global(body.shader-reading) .shader-background::after {
+    background-color: hsl(var(--background) / 0.52);
+  }
+
+  :global(.dark body.shader-reading) .shader-background canvas,
+  :global(body.dark.shader-reading) .shader-background canvas {
+    opacity: 0.62;
+    filter: blur(16px) invert(1) hue-rotate(180deg) brightness(0.36) saturate(0.82);
+  }
+
+  :global(.dark body.shader-reading) .shader-background::after,
+  :global(body.dark.shader-reading) .shader-background::after {
+    background-color: hsl(var(--background) / 0.66);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .shader-background canvas {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .shader-background.is-active canvas {
+      opacity: 0.82;
+    }
+
+    :global(.dark) .shader-background.is-active canvas {
+      opacity: 0.82;
+    }
+
+    :global(body.shader-reading) .shader-background canvas {
+      transform: scale(1.07);
+      filter: blur(18px) saturate(0.72);
+    }
+
+    :global(.dark body.shader-reading) .shader-background canvas,
+    :global(body.dark.shader-reading) .shader-background canvas {
+      opacity: 0.58;
+      filter: blur(20px) invert(1) hue-rotate(180deg) brightness(0.34) saturate(0.78);
+    }
+  }
+</style>
