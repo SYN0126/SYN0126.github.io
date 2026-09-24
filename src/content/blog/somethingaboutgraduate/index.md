@@ -9,7 +9,7 @@ tags:
   - 未分类
 categories: []
 language: zh-CN
-draft: true
+draft: false
 comment: true
 originalPath: posts/2026-08-18-somethingaboutgraduate.md
 ---

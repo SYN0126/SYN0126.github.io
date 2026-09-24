@@ -9,7 +9,7 @@ tags:
   - 表达
 categories: []
 language: zh-CN
-draft: false
+draft: true
 comment: true
 originalPath: posts/2026-08-15-people.md
 ---
