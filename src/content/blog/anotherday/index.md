@@ -1,7 +1,7 @@
 ---
 title: "another day , another ..."
 description: "just funny"
-publishDate: 2026-10-02T00:26:14+09:00
+publishDate: 2026-10-01T23:26:14+09:00
 tags: ["未分类"]
 categories: []
 language: zh-CN
