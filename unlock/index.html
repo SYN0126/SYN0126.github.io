@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <title>访问验证</title>
+    <link rel="stylesheet" href="../home.css">
+    <link rel="stylesheet" href="./access.css">
+    <script type="module" src="./access.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>访问验证</h1>
+      <form>
+        <label for="password">密码</label>
+        <input id="password" type="password" autocomplete="current-password" maxlength="256" required>
+        <label for="access-key">解锁密钥</label>
+        <input id="access-key" type="password" spellcheck="false" maxlength="64" required>
+        <button type="submit">解锁博客</button>
+      </form>
+      <p role="status"></p>
+      <button id="lock" type="button">锁定博客</button>
+      <a href="../">返回首页</a>
+    </main>
+  </body>
+</html>

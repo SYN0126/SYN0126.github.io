@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /unlock/
+Disallow: /sealed/
+Disallow: /reading/

@@ -1,0 +1,78 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #192920;
+  background: #eef4f0;
+}
+
+body {
+  display: grid;
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0;
+  padding: 1.5rem;
+  box-sizing: border-box;
+  place-items: center;
+}
+
+main {
+  width: min(100%, 30rem);
+  box-sizing: border-box;
+  padding: clamp(1.75rem, 8vw, 4rem);
+  border: 1px solid #d1dfd6;
+  border-radius: 1.75rem;
+  background: #fcfefc;
+  box-shadow: 0 1.25rem 4rem #132e2010;
+}
+
+.monogram {
+  display: grid;
+  width: 4.125rem;
+  height: 4.125rem;
+  place-items: center;
+  border: 0;
+  border-radius: 1.25rem;
+  color: #d9f9e2;
+  background: #173d2f;
+  font: 700 1.625rem/1 system-ui, sans-serif;
+  letter-spacing: -.11em;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.monogram span span {
+  color: #9fd9b5;
+}
+
+:focus-visible {
+  outline: 3px solid #308053;
+  outline-offset: 5px;
+}
+
+h1 {
+  margin: 1.5rem 0 .5rem;
+  font-size: clamp(2.25rem, 9vw, 3.75rem);
+  line-height: 1.1;
+  letter-spacing: -.06em;
+}
+
+p {
+  margin: 0 0 1.625rem;
+  line-height: 1.8;
+  color: #445b4d;
+}
+
+a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: #204d36;
+  font-weight: 650;
+  text-underline-offset: .25em;
+}
+
+.personal-link {
+  margin-top: .75rem;
+  padding-top: .75rem;
+  border-top: 1px solid #d1dfd6;
+}
