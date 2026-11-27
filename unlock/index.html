@@ -7,20 +7,26 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
     <title>访问验证</title>
     <link rel="stylesheet" href="../home.css">
-    <link rel="stylesheet" href="./access.css">
-    <script type="module" src="./access.js"></script>
+    <link rel="stylesheet" href="./access.css?v=2">
+    <script type="module" src="./access.js?v=2"></script>
   </head>
   <body>
     <main>
       <h1>访问验证</h1>
-      <form>
+      <form id="password-form">
         <label for="password">密码</label>
         <input id="password" type="password" autocomplete="current-password" maxlength="256" required>
-        <label for="access-key">解锁密钥</label>
-        <input id="access-key" type="password" spellcheck="false" maxlength="64" required>
         <button type="submit">解锁博客</button>
       </form>
+      <div id="file-choice">
+        <label for="key-file">或选择钥匙文件</label>
+        <input id="key-file" type="file" accept=".json,application/json">
+      </div>
       <p role="status"></p>
+      <div id="unlocked" hidden>
+        <a id="download-key" download="炫光版钥匙.json">下载钥匙文件</a>
+        <a href="../reading/">进入博客</a>
+      </div>
       <button id="lock" type="button">锁定博客</button>
       <a href="../">返回首页</a>
     </main>

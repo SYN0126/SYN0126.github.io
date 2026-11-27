@@ -8,3 +8,5 @@ button:disabled { opacity: .65; cursor: wait; }
 #lock { margin: .75rem .75rem .75rem 0; color: #173d2f; background: white; }
 p[role="status"] { margin: .75rem 0 0; }
 p[role="status"]:empty { display: none; }
+#file-choice { margin-top: 1.25rem; }
+#unlocked a + a { margin-left: 1rem; }
